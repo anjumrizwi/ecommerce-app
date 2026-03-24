@@ -1,0 +1,145 @@
+Perfect—now we move from planning → actual implementation using AI Agent 🔥
+I’ll give you execution-ready prompts specifically designed for use inside
+
+Visual Studio Code Insiders AI agent
+👉 These prompts are:
+Step-by-step
+Actionable
+Designed to create/modify files directly in your workspace
+🚀 🧠 Implementation Prompts (Use Directly in AI Agent)
+🏗️ PHASE 1: Create Solution & Projects
+🔹 Prompt 1: Create Solution Structure
+Act as a senior .NET architect and generate a complete solution structure in this workspace.
+Create a .NET 10 solution named EcommerceApp.
+Add projects:
+- Ecommerce.API (ASP.NET Core Web API)
+- Ecommerce.Application (Class Library)
+- Ecommerce.Domain (Class Library)
+- Ecommerce.Infrastructure (Class Library)
+Add proper project references following Clean Architecture.
+Create folders inside each project based on best practices.
+Execute required dotnet CLI commands.
+🔹 Prompt 2: Configure API Project
+Setup the Ecommerce.API project.
+Configure Program.cs with middleware including Swagger, global exception handling, and logging.
+Enable controllers and minimal API support.
+Ensure the project builds and runs successfully.
+🧩 PHASE 2: Domain Layer Implementation
+🔹 Prompt 3: Create Domain Entities
+In Ecommerce.Domain project, create entities:
+Product, Category, User, Order, OrderItem, Cart.
+Add properties, relationships, and navigation properties.
+Follow domain-driven design principles.
+🔹 Prompt 4: Add Enums and Value Objects
+Create enums for OrderStatus and PaymentStatus.
+Add a value object for Address.
+Ensure immutability and proper structure.
+🗄️ PHASE 3: EF Core Setup
+🔹 Prompt 5: Create DbContext
+In Ecommerce.Infrastructure, create ApplicationDbContext using EF Core.
+Configure DbSets for all entities.
+Add relationships using Fluent API.
+🔹 Prompt 6: Configure SQL Server
+Configure SQL Server connection in appsettings.json.
+Update Program.cs to register DbContext with SQL Server.
+Ensure connection string is environment-based.
+🔹 Prompt 7: Add Migrations
+Generate initial EF Core migration and update the database.
+Ensure tables are created correctly.
+Fix any migration issues.
+🔐 PHASE 4: Security & Secrets
+🔹 Prompt 8: Integrate Azure Key Vault
+Integrate Azure Key Vault into the API project.
+Configure secure retrieval of connection strings and secrets.
+Use DefaultAzureCredential for authentication.
+Update configuration pipeline.
+🔹 Prompt 9: Add Authentication
+Implement JWT authentication.
+Add login and register endpoints.
+Configure role-based authorization (Admin, Customer).
+Secure APIs using [Authorize] attribute.
+⚙️ PHASE 5: Application Layer
+🔹 Prompt 10: Create Repository Pattern
+Implement generic repository and unit of work pattern in Infrastructure layer.
+Create interfaces in Application layer.
+Register repositories in dependency injection.
+🔹 Prompt 11: Create Services
+Create ProductService, OrderService, and CartService in Application layer.
+Implement business logic using repositories.
+Use async/await and proper error handling.
+🌐 PHASE 6: API Controllers
+🔹 Prompt 12: Product Controller
+Create ProductController in API project.
+Add CRUD endpoints using REST standards.
+Use DTOs and AutoMapper.
+Return proper HTTP status codes.
+🔹 Prompt 13: Order Controller
+Create OrderController with endpoints:
+Place order, get order history, update order status.
+Ensure transactional consistency.
+🔹 Prompt 14: Cart Controller
+Create CartController with endpoints:
+Add to cart, remove from cart, view cart.
+Handle user-specific data.
+🧪 PHASE 7: Validation & Testing
+🔹 Prompt 15: Add Validation
+Integrate FluentValidation.
+Create validators for Product, Order, and User DTOs.
+Return structured validation errors.
+🔹 Prompt 16: Generate Unit Tests
+Create a new test project using xUnit.
+Generate unit tests for ProductService using Moq.
+Cover success, failure, and edge cases.
+📈 PHASE 8: Logging & Performance
+🔹 Prompt 17: Add Logging
+Integrate Serilog into API project.
+Log requests, responses, and exceptions.
+Configure logging output to console and file.
+🔹 Prompt 18: Optimize Performance
+Implement pagination for product listing.
+Optimize EF Core queries using AsNoTracking.
+Add caching for frequently accessed data.
+🚀 PHASE 9: Finalization
+🔹 Prompt 19: Global Exception Handling
+Implement global exception handling middleware.
+Return standardized error responses.
+Handle validation, business, and system exceptions.
+🔹 Prompt 20: Prepare for Deployment
+Prepare application for Azure deployment.
+Add environment configurations.
+Ensure Azure Key Vault integration works.
+Generate basic CI/CD pipeline YAML.
+🔥 🧠 SUPER PROMPT (Agent Mode – Full Build)
+Use this if you want AI agent to attempt end-to-end generation:
+Act as a senior .NET architect and build a complete e-commerce application in this workspace using .NET 10.
+Follow Clean Architecture with API, Application, Domain, and Infrastructure layers.
+Implement entities, DbContext, repositories, services, and controllers.
+Use EF Core with SQL Server.
+Add JWT authentication and role-based authorization.
+Integrate Azure Key Vault for secrets.
+Add validation using FluentValidation.
+Implement logging using Serilog.
+Generate unit tests using xUnit and Moq.
+Ensure the application builds and runs successfully.
+Create all necessary files and explain each step.
+⚠️ Pro Tips for Using AI Agent (Very Important)
+✅ Do this:
+Run prompts one by one (recommended)
+Review changes before accepting
+Build project after every 2–3 steps
+❌ Avoid:
+Running everything at once initially
+Accepting code without review
+🎯 Final Takeaway
+These prompts turn your AI agent into a junior-to-senior developer working for you
+🚀 If you want next step
+I can:
+✅ Walk you live step-by-step execution (like lab)
+
+✅ Fix errors you encounter
+
+✅ Convert this into a demo-ready project
+Just say “Start Implementation Walkthrough” 👍
+ 
+I got these prompts to build an e-commerce app using VS Code Insider AI agent.
+ 
