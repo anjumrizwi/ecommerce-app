@@ -11,6 +11,9 @@ public class Product : BaseEntity
     public int StockQuantity { get; private set; }
     public ProductStatus Status { get; private set; }
 
+    public Guid? CategoryId { get; private set; }
+    public Category? Category { get; private set; }
+
     private Product() { }
 
     public static Product Create(string name, string description, decimal price, int stockQuantity)

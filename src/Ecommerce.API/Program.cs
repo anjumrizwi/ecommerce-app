@@ -1,6 +1,11 @@
+using Azure.Identity;
 using Ecommerce.API.Extensions;
+using Ecommerce.API.Security;
 using Ecommerce.Infrastructure.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System.Text;
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -17,6 +22,21 @@ try
 
     // Add Serilog as logging provider
     builder.Host.UseSerilog();
+
+    // Configure Azure Key Vault
+    var keyVaultUri = builder.Configuration["KeyVault:VaultUri"];
+    if (!string.IsNullOrWhiteSpace(keyVaultUri))
+    {
+        builder.Configuration.AddAzureKeyVault(
+            new Uri(keyVaultUri),
+            new DefaultAzureCredential());
+        Log.Information($"Azure Key Vault configured: {keyVaultUri}");
+    }
+    else if (!builder.Environment.IsDevelopment())
+    {
+        throw new InvalidOperationException(
+            "KeyVault:VaultUri must be configured in non-Development environments.");
+    }
 
     // Add services to the container
     builder.Services.AddControllers();
@@ -47,16 +67,47 @@ try
     // Add CORS
     builder.Services.AddCors(options =>
     {
+        var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+            ?? ["http://localhost:3000", "http://localhost:5173"];
+
         options.AddPolicy("AllowAll", policy =>
         {
-            policy.AllowAnyOrigin()
+            policy.WithOrigins(allowedOrigins)
                   .AllowAnyMethod()
-                  .AllowAnyHeader();
+                  .AllowAnyHeader()
+                  .AllowCredentials();
         });
     });
 
     // Add Infrastructure services
     builder.Services.AddInfrastructure(builder.Configuration);
+
+    // Configure JWT authentication
+    var jwtSection = builder.Configuration.GetSection("Jwt");
+    var jwtKey = jwtSection["Key"] ?? throw new InvalidOperationException("Jwt:Key is not configured.");
+
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateIssuerSigningKey = true,
+                ValidateLifetime = true,
+                ValidIssuer = jwtSection["Issuer"],
+                ValidAudience = jwtSection["Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            };
+        });
+
+    builder.Services.AddAuthorization(options =>
+    {
+        options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+        options.AddPolicy("CustomerOnly", policy => policy.RequireRole("Customer"));
+    });
+
+    builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
     var app = builder.Build();
 
