@@ -7,6 +7,7 @@ Step-by-step
 Actionable
 Designed to create/modify files directly in your workspace
 🚀 🧠 Implementation Prompts (Use Directly in AI Agent)
+
 🏗️ PHASE 1: Create Solution & Projects
 🔹 Prompt 1: Create Solution Structure
 Act as a senior .NET architect and generate a complete solution structure in this workspace.
@@ -24,6 +25,7 @@ Setup the Ecommerce.API project.
 Configure Program.cs with middleware including Swagger, global exception handling, and logging.
 Enable controllers and minimal API support.
 Ensure the project builds and runs successfully.
+
 🧩 PHASE 2: Domain Layer Implementation
 🔹 Prompt 3: Create Domain Entities
 In Ecommerce.Domain project, create entities:
@@ -34,6 +36,7 @@ Follow domain-driven design principles.
 Create enums for OrderStatus and PaymentStatus.
 Add a value object for Address.
 Ensure immutability and proper structure.
+
 🗄️ PHASE 3: EF Core Setup
 🔹 Prompt 5: Create DbContext
 In Ecommerce.Infrastructure, create ApplicationDbContext using EF Core.
@@ -47,6 +50,7 @@ Ensure connection string is environment-based.
 Generate initial EF Core migration and update the database.
 Ensure tables are created correctly.
 Fix any migration issues.
+
 🔐 PHASE 4: Security & Secrets
 🔹 Prompt 8: Integrate Azure Key Vault
 Integrate Azure Key Vault into the API project.
@@ -58,6 +62,7 @@ Implement JWT authentication.
 Add login and register endpoints.
 Configure role-based authorization (Admin, Customer).
 Secure APIs using [Authorize] attribute.
+
 ⚙️ PHASE 5: Application Layer
 🔹 Prompt 10: Create Repository Pattern
 Implement generic repository and unit of work pattern in Infrastructure layer.
@@ -67,6 +72,7 @@ Register repositories in dependency injection.
 Create ProductService, OrderService, and CartService in Application layer.
 Implement business logic using repositories.
 Use async/await and proper error handling.
+
 🌐 PHASE 6: API Controllers
 🔹 Prompt 12: Product Controller
 Create ProductController in API project.
@@ -81,6 +87,7 @@ Ensure transactional consistency.
 Create CartController with endpoints:
 Add to cart, remove from cart, view cart.
 Handle user-specific data.
+
 🧪 PHASE 7: Validation & Testing
 🔹 Prompt 15: Add Validation
 Integrate FluentValidation.
@@ -90,6 +97,7 @@ Return structured validation errors.
 Create a new test project using xUnit.
 Generate unit tests for ProductService using Moq.
 Cover success, failure, and edge cases.
+
 📈 PHASE 8: Logging & Performance
 🔹 Prompt 17: Add Logging
 Integrate Serilog into API project.
@@ -99,6 +107,7 @@ Configure logging output to console and file.
 Implement pagination for product listing.
 Optimize EF Core queries using AsNoTracking.
 Add caching for frequently accessed data.
+
 🚀 PHASE 9: Finalization
 🔹 Prompt 19: Global Exception Handling
 Implement global exception handling middleware.
@@ -122,6 +131,7 @@ Implement logging using Serilog.
 Generate unit tests using xUnit and Moq.
 Ensure the application builds and runs successfully.
 Create all necessary files and explain each step.
+
 ⚠️ Pro Tips for Using AI Agent (Very Important)
 ✅ Do this:
 Run prompts one by one (recommended)

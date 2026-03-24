@@ -1,5 +1,9 @@
 /src/.vs
+/src/Ecommerce.API/bin
 /src/Ecommerce.API/obj
+/src/Ecommerce.Application/bin
 /src/Ecommerce.Application/obj
+/src/Ecommerce.Domain/bin
 /src/Ecommerce.Domain/obj
+/src/Ecommerce.Infrastructure/bin
 /src/Ecommerce.Infrastructure/obj
