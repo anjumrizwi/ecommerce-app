@@ -118,7 +118,8 @@ Prepare application for Azure deployment.
 Add environment configurations.
 Ensure Azure Key Vault integration works.
 Generate basic CI/CD pipeline YAML.
-🔥 🧠 SUPER PROMPT (Agent Mode – Full Build)
+
+SUPER PROMPT (Agent Mode – Full Build):
 Use this if you want AI agent to attempt end-to-end generation:
 Act as a senior .NET architect and build a complete e-commerce application in this workspace using .NET 10.
 Follow Clean Architecture with API, Application, Domain, and Infrastructure layers.
