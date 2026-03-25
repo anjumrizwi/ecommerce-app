@@ -1,5 +1,6 @@
 using Azure.Identity;
 using Ecommerce.API.Extensions;
+using Ecommerce.API.Mappings;
 using Ecommerce.API.Security;
 using Ecommerce.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -41,6 +42,11 @@ try
     // Add services to the container
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddAutoMapper(cfg =>
+        {
+            cfg.AddProfile<ProductMappingProfile>();
+            cfg.AddProfile<CartMappingProfile>();
+        });
     
     // Configure Swagger/OpenAPI
     builder.Services.AddSwaggerGen(options =>

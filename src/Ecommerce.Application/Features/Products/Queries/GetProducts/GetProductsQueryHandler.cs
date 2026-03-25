@@ -1,5 +1,5 @@
+using Ecommerce.Application.Common.Interfaces;
 using Ecommerce.Application.Features.Products.Queries.GetProducts;
-using Ecommerce.Domain.Interfaces;
 
 namespace Ecommerce.Application.Features.Products.Queries.GetProducts;
 

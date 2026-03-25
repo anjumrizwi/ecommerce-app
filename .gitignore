@@ -1,9 +1,12 @@
 /src/.vs
-/src/Ecommerce.API/bin
+/src/Ecommerce.API/bin/*
 /src/Ecommerce.API/obj
 /src/Ecommerce.Application/bin
 /src/Ecommerce.Application/obj
-/src/Ecommerce.Domain/bin
+/src/Ecommerce.Domain/bin/*
 /src/Ecommerce.Domain/obj
-/src/Ecommerce.Infrastructure/bin
+/src/Ecommerce.Infrastructure/bin/*
 /src/Ecommerce.Infrastructure/obj
+/src/Ecommerce.API/logs/*.*
+/src/Ecommerce.API/stderr.txt
+/src/Ecommerce.API/stdout.txt

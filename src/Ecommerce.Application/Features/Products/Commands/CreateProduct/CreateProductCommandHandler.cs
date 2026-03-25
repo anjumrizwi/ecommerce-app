@@ -1,6 +1,5 @@
 using Ecommerce.Application.Common.Interfaces;
 using Ecommerce.Domain.Entities;
-using Ecommerce.Domain.Interfaces;
 
 namespace Ecommerce.Application.Features.Products.Commands.CreateProduct;
 
