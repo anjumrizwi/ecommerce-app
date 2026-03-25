@@ -1,5 +1,6 @@
 using AutoMapper;
 using Ecommerce.API.Models.Products;
+using Ecommerce.Application.Common.Models;
 using Ecommerce.Application.Common.Interfaces;
 using AppServices = Ecommerce.Application.Services.Products;
 using Microsoft.AspNetCore.Authorization;
@@ -22,6 +23,27 @@ public class ProductsController(IProductService productService, IMapper mapper) 
         var products = await productService.GetAllAsync(cancellationToken);
         return Ok(mapper.Map<IEnumerable<ProductResponse>>(products));
     }
+
+        /// <summary>Gets a paginated list of products.</summary>
+        /// <param name="pageNumber">Page number (default: 1).</param>
+        /// <param name="pageSize">Items per page (default: 20, max: 100).</param>
+        /// <response code="200">Returns a paginated list of products.</response>
+        [HttpGet("paged")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(PaginatedList<ProductResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetPaged(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 20,
+            CancellationToken cancellationToken = default)
+        {
+            pageNumber = Math.Max(1, pageNumber);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+
+            var request = new AppServices.PagedProductsRequest(pageNumber, pageSize);
+            var paged = await productService.GetPagedAsync(request, cancellationToken);
+            var items = mapper.Map<IReadOnlyCollection<ProductResponse>>(paged.Items);
+            return Ok(new PaginatedList<ProductResponse>(items, paged.TotalCount, paged.PageNumber, paged.PageSize));
+        }
 
     /// <summary>Gets a product by ID.</summary>
     /// <response code="200">Returns the product.</response>

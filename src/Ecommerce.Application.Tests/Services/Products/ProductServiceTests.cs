@@ -4,6 +4,7 @@ using Ecommerce.Domain.Entities;
 using Ecommerce.Domain.Exceptions;
 using FluentAssertions;
 using Moq;
+using Microsoft.Extensions.Caching.Memory;
 using Xunit;
 
 namespace Ecommerce.Application.Tests.Services.Products;
@@ -12,6 +13,7 @@ public class ProductServiceTests
 {
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IProductRepository> _productRepositoryMock;
+    private readonly IMemoryCache _memoryCache;
     private readonly ProductService _sut;
 
     public ProductServiceTests()
@@ -21,7 +23,9 @@ public class ProductServiceTests
 
         _unitOfWorkMock.Setup(u => u.Products).Returns(_productRepositoryMock.Object);
 
-        _sut = new ProductService(_unitOfWorkMock.Object);
+        // Use a real MemoryCache so cache interactions behave correctly in tests
+        _memoryCache = new MemoryCache(new MemoryCacheOptions());
+        _sut = new ProductService(_unitOfWorkMock.Object, _memoryCache);
     }
 
     #region GetAllAsync

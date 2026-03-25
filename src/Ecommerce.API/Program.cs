@@ -8,21 +8,26 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
 
-// Configure Serilog
+// Bootstrap logger — minimal config for startup errors only.
+// Full configuration is applied via appsettings.json below.
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
+    .MinimumLevel.Warning()
     .WriteTo.Console()
-    .WriteTo.File("logs/ecommerce-api-.txt", rollingInterval: RollingInterval.Day)
-    .Enrich.FromLogContext()
-    .Enrich.WithProperty("Application", "Ecommerce.API")
-    .CreateLogger();
+    .CreateBootstrapLogger();
 
 try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    // Add Serilog as logging provider
-    builder.Host.UseSerilog();
+    // Add Serilog — reads full config (sinks, levels, enrichers) from appsettings.json
+    builder.Host.UseSerilog((context, services, configuration) =>
+        configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .Enrich.WithMachineName()
+            .Enrich.WithThreadId()
+            .Enrich.WithProperty("Application", "Ecommerce.API"));
 
     // Configure Azure Key Vault
     var keyVaultUri = builder.Configuration["KeyVault:VaultUri"];
@@ -130,6 +135,25 @@ try
 
     // Use custom exception handling middleware
     app.UseCustomExceptionHandler();
+
+    // Log all HTTP requests and responses (method, path, status code, elapsed time)
+    app.UseSerilogRequestLogging(options =>
+    {
+        options.MessageTemplate =
+            "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
+
+        options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+        {
+            diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+            diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+            diagnosticContext.Set("UserAgent",
+                httpContext.Request.Headers.UserAgent.FirstOrDefault() ?? "unknown");
+
+            if (httpContext.User.Identity?.IsAuthenticated == true)
+                diagnosticContext.Set("UserId",
+                    httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+        };
+    });
 
     // Use CORS
     app.UseCors("AllowAll");

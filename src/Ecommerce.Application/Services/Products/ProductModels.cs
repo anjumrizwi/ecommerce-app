@@ -20,3 +20,5 @@ public record UpdateProductRequest(
     string Description,
     decimal Price,
     int StockQuantity);
+
+public record PagedProductsRequest(int PageNumber = 1, int PageSize = 20);

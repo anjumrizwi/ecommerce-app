@@ -17,6 +17,9 @@ public static class ServiceCollectionExtensions
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
+            // In-memory cache for frequently accessed data (e.g. product listings)
+            services.AddMemoryCache();
+
         // Repositories
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();

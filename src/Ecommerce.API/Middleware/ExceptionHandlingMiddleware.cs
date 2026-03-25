@@ -14,7 +14,12 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An unhandled exception occurred.");
+            logger.LogError(ex,
+                "Unhandled exception. Method: {RequestMethod}, Path: {RequestPath}, TraceId: {TraceId}",
+                context.Request.Method,
+                context.Request.Path,
+                context.TraceIdentifier);
+
             await HandleExceptionAsync(context, ex);
         }
     }

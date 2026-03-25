@@ -10,3 +10,6 @@
 /src/Ecommerce.API/logs/*.*
 /src/Ecommerce.API/stderr.txt
 /src/Ecommerce.API/stdout.txt
+/src/Ecommerce.Application.Tests/obj
+/src/Ecommerce.Application.Tests/bin/Debug/net10.0/*.Tests
+/src/Ecommerce.Application.Tests/bin/Debug/net10.0
