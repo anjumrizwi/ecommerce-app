@@ -123,14 +123,21 @@ try
     var app = builder.Build();
 
     // Configure the HTTP request pipeline
-    if (app.Environment.IsDevelopment())
+    // Swagger available in Development and Staging — disabled in Production.
+    if (!app.Environment.IsProduction())
     {
         app.UseSwagger();
         app.UseSwaggerUI(options =>
         {
             options.SwaggerEndpoint("/swagger/v1/swagger.json", "Ecommerce API v1");
-            options.RoutePrefix = string.Empty; // Serve Swagger UI at root
+            options.RoutePrefix = string.Empty;
         });
+    }
+
+    // HSTS — only meaningful in production (browser caching of HTTPS requirement).
+    if (app.Environment.IsProduction())
+    {
+        app.UseHsts();
     }
 
     // Use custom exception handling middleware

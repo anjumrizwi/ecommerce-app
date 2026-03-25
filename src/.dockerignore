@@ -1,0 +1,28 @@
+## Build artifacts
+**/bin/
+**/obj/
+
+## Runtime logs and secrets
+**/logs/
+**/stderr.txt
+**/stdout.txt
+**/*.user
+**/*.suo
+.vs/
+
+## Local developer configuration — never baked into the image
+**/appsettings.Development.json
+**/appsettings.Staging.json
+**/.secrets/
+
+## Test projects — excluded from final image (tests run in the build stage)
+Ecommerce.Application.Tests/
+
+## VCS
+.git/
+.gitignore
+.gitattributes
+
+## Docker itself
+Dockerfile
+.dockerignore

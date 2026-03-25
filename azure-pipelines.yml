@@ -1,0 +1,155 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Azure Pipelines CI/CD — Ecommerce API
+#
+# Required pipeline variables / variable groups:
+#   • DOCKER_REGISTRY_SERVER_URL   – e.g. myregistry.azurecr.io
+#   • DOCKER_REGISTRY_SERVICE_CONN – service connection name to ACR
+#   • AZURE_SUBSCRIPTION_SERVICE_CONN – service connection name to Azure
+#   • AZURE_WEBAPP_NAME            – target Azure Web App name
+#   • AZURE_WEBAPP_RESOURCE_GROUP  – resource group of the Web App
+#   • STAGING_SLOT_NAME            – deployment slot (default: staging)
+# ─────────────────────────────────────────────────────────────────────────────
+
+trigger:
+  branches:
+    include:
+      - main
+      - releases/*
+  paths:
+    include:
+      - src/**
+
+pr:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - src/**
+
+variables:
+  buildConfiguration: Release
+  dotnetVersion: "10.x"
+  workingDir: src
+  imageName: ecommerce-api
+  imageTag: $(Build.BuildId)
+
+stages:
+
+  # ── Stage 1: CI — Build & Test ─────────────────────────────────────────────
+  - stage: CI
+    displayName: Build & Test
+    jobs:
+      - job: BuildAndTest
+        displayName: dotnet build + test
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: UseDotNet@2
+            displayName: Install .NET $(dotnetVersion)
+            inputs:
+              packageType: sdk
+              version: $(dotnetVersion)
+
+          - task: DotNetCoreCLI@2
+            displayName: Restore
+            inputs:
+              command: restore
+              projects: $(workingDir)/EcommerceApp.sln
+
+          - task: DotNetCoreCLI@2
+            displayName: Build
+            inputs:
+              command: build
+              projects: $(workingDir)/EcommerceApp.sln
+              arguments: >
+                --configuration $(buildConfiguration)
+                --no-restore
+
+          - task: DotNetCoreCLI@2
+            displayName: Test
+            inputs:
+              command: test
+              projects: $(workingDir)/Ecommerce.Application.Tests/Ecommerce.Application.Tests.csproj
+              arguments: >
+                --configuration $(buildConfiguration)
+                --no-build
+                --collect "XPlat Code Coverage"
+              publishTestResults: true
+
+          - task: PublishCodeCoverageResults@2
+            displayName: Publish code coverage
+            inputs:
+              summaryFileLocation: $(Agent.TempDirectory)/**/coverage.cobertura.xml
+
+  # ── Stage 2: Docker build & push ───────────────────────────────────────────
+  - stage: Docker
+    displayName: Docker Build & Push
+    dependsOn: CI
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    jobs:
+      - job: DockerBuildPush
+        displayName: Build image and push to ACR
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: Docker@2
+            displayName: Build & push image
+            inputs:
+              command: buildAndPush
+              containerRegistry: $(DOCKER_REGISTRY_SERVICE_CONN)
+              repository: $(imageName)
+              dockerfile: $(workingDir)/Dockerfile
+              buildContext: $(workingDir)
+              tags: |
+                $(imageTag)
+                latest
+
+  # ── Stage 3: Deploy to Staging slot ────────────────────────────────────────
+  - stage: DeployStaging
+    displayName: Deploy → Staging
+    dependsOn: Docker
+    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'))
+    jobs:
+      - deployment: DeployToStaging
+        displayName: Deploy to staging slot
+        environment: Staging
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureWebAppContainer@1
+                  displayName: Deploy container to staging slot
+                  inputs:
+                    azureSubscription: $(AZURE_SUBSCRIPTION_SERVICE_CONN)
+                    appName: $(AZURE_WEBAPP_NAME)
+                    resourceGroupName: $(AZURE_WEBAPP_RESOURCE_GROUP)
+                    slotName: $(STAGING_SLOT_NAME)
+                    containers: $(DOCKER_REGISTRY_SERVER_URL)/$(imageName):$(imageTag)
+
+  # ── Stage 4: Swap Staging → Production ─────────────────────────────────────
+  - stage: DeployProduction
+    displayName: Swap → Production
+    dependsOn: DeployStaging
+    condition: succeeded()
+    jobs:
+      - deployment: SwapToProduction
+        displayName: Swap staging → production slot
+        environment: Production
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureAppServiceManage@0
+                  displayName: Swap slots
+                  inputs:
+                    azureSubscription: $(AZURE_SUBSCRIPTION_SERVICE_CONN)
+                    Action: Swap Slots
+                    WebAppName: $(AZURE_WEBAPP_NAME)
+                    ResourceGroupName: $(AZURE_WEBAPP_RESOURCE_GROUP)
+                    SourceSlot: $(STAGING_SLOT_NAME)
+                    SwapWithProduction: true
