@@ -13,3 +13,6 @@
 /src/Ecommerce.Application.Tests/obj
 /src/Ecommerce.Application.Tests/bin/Debug/net10.0/*.Tests
 /src/Ecommerce.Application.Tests/bin/Debug/net10.0
+/src/Ecommerce.UI/ClientApp/node_modules
+/src/Ecommerce.UI/bin/
+/src/Ecommerce.UI/obj/
