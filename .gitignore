@@ -16,3 +16,7 @@
 /src/Ecommerce.UI/ClientApp/node_modules
 /src/Ecommerce.UI/bin/
 /src/Ecommerce.UI/obj/
+/src/Ecommerce.API/bin
+/src/Ecommerce.Application.Tests/bin
+/src/Ecommerce.Domain/bin
+/src/Ecommerce.Infrastructure/bin
