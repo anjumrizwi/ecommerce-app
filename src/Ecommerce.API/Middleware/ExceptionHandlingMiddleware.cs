@@ -17,7 +17,17 @@ public class ExceptionHandlingMiddleware(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex,
+            var logLevel = ex switch
+            {
+                ValidationException => LogLevel.Warning,
+                Ecommerce.Domain.Exceptions.NotFoundException => LogLevel.Information,
+                Ecommerce.Domain.Exceptions.ConflictException => LogLevel.Information,
+                OperationCanceledException => LogLevel.Information,
+                UnauthorizedAccessException => LogLevel.Warning,
+                _ => LogLevel.Error
+            };
+
+            logger.Log(logLevel, ex,
                 "Unhandled exception. Method: {RequestMethod}, Path: {RequestPath}, TraceId: {TraceId}",
                 context.Request.Method,
                 context.Request.Path,
@@ -46,6 +56,10 @@ public class ExceptionHandlingMiddleware(
             // Operation cancelled by client — 499-ish, surface as 400
             OperationCanceledException =>
                 (HttpStatusCode.BadRequest, "Request Cancelled", (IDictionary<string, string[]>?)null),
+
+            // Authorization failure from token/user identity extraction
+            UnauthorizedAccessException =>
+                (HttpStatusCode.Unauthorized, "Unauthorized", (IDictionary<string, string[]>?)null),
 
             // System / unexpected — 500
             _ => (HttpStatusCode.InternalServerError, "An unexpected error occurred.", (IDictionary<string, string[]>?)null)

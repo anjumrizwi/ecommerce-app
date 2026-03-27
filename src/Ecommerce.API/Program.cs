@@ -3,7 +3,10 @@ using Ecommerce.API.Extensions;
 using Ecommerce.API.Mappings;
 using Ecommerce.API.Security;
 using Ecommerce.Infrastructure.Extensions;
+using Ecommerce.Infrastructure.Persistence;
+using Ecommerce.Infrastructure.Persistence.Seeding;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
@@ -100,6 +103,7 @@ try
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
         {
+            options.MapInboundClaims = false;
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
@@ -121,6 +125,28 @@ try
     builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
     var app = builder.Build();
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var startupLogger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
+            .CreateLogger("Startup");
+
+        startupLogger.LogInformation(
+            "Applying migrations and seed to database {Database} on {DataSource}.",
+            dbContext.Database.GetDbConnection().Database,
+            dbContext.Database.GetDbConnection().DataSource);
+
+        await dbContext.Database.MigrateAsync();
+
+        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
+            .CreateLogger("ProductSeed");
+
+        await ProductSeedData.SeedAsync(dbContext, logger);
+
+        var productCount = await dbContext.Products.CountAsync();
+        startupLogger.LogInformation("Startup complete. Products in database: {ProductCount}.", productCount);
+    }
 
     // Configure the HTTP request pipeline
     // Swagger available in Development and Staging — disabled in Production.

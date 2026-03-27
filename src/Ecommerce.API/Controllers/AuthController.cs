@@ -95,7 +95,9 @@ public class AuthController : ControllerBase
     [Authorize]
     public IActionResult Me()
     {
-        var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+            ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("nameid")?.Value;
         var email = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
         var role = User.FindFirst(ClaimTypes.Role)?.Value;
 

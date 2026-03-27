@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using AutoMapper;
 using Ecommerce.API.Models.Carts;
 using Ecommerce.Application.Common.Interfaces;
@@ -53,7 +54,9 @@ public class CartController(ICartService cartService, IMapper mapper) : Controll
 
     private Guid GetUserId()
     {
-        var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+            ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("nameid")?.Value;
 
         if (!Guid.TryParse(userId, out var parsed))
             throw new UnauthorizedAccessException("Invalid or missing user identifier in token.");

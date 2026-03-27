@@ -6,6 +6,9 @@ namespace Ecommerce.Application.Services.Carts;
 
 public class CartService(IUnitOfWork unitOfWork) : ICartService
 {
+    private const int MaxConcurrencyRetries = 3;
+    private const int BaseRetryDelayMilliseconds = 25;
+
     public async Task<CartDto> GetCartAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var cart = await unitOfWork.Carts.GetByUserIdAsync(userId, cancellationToken);
@@ -20,43 +23,29 @@ public class CartService(IUnitOfWork unitOfWork) : ICartService
         _ = await unitOfWork.Products.GetByIdAsync(productId, cancellationToken)
             ?? throw new NotFoundException(nameof(Product), productId);
 
-        var cart = await unitOfWork.Carts.GetByUserIdAsync(userId, cancellationToken);
-        if (cart is null)
-        {
-            cart = Cart.Create(userId);
-            await unitOfWork.Carts.AddAsync(cart, cancellationToken);
-        }
-
-        cart.AddItem(productId, quantity);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.Carts.AddItemAtomicAsync(userId, productId, quantity, cancellationToken);
     }
 
     public async Task UpdateItemQuantityAsync(Guid userId, Guid productId, int quantity, CancellationToken cancellationToken = default)
-    {
-        var cart = await unitOfWork.Carts.GetByUserIdAsync(userId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Cart), userId);
-
-        cart.UpdateItemQuantity(productId, quantity);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-    }
+        => await ExecuteCartMutationWithRetryAsync(
+            userId,
+            cart => cart.UpdateItemQuantity(productId, quantity),
+            createCartIfMissing: false,
+            cancellationToken);
 
     public async Task RemoveItemAsync(Guid userId, Guid productId, CancellationToken cancellationToken = default)
-    {
-        var cart = await unitOfWork.Carts.GetByUserIdAsync(userId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Cart), userId);
-
-        cart.RemoveItem(productId);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-    }
+        => await ExecuteCartMutationWithRetryAsync(
+            userId,
+            cart => cart.RemoveItem(productId),
+            createCartIfMissing: false,
+            cancellationToken);
 
     public async Task ClearCartAsync(Guid userId, CancellationToken cancellationToken = default)
-    {
-        var cart = await unitOfWork.Carts.GetByUserIdAsync(userId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Cart), userId);
-
-        cart.Clear();
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-    }
+        => await ExecuteCartMutationWithRetryAsync(
+            userId,
+            cart => cart.Clear(),
+            createCartIfMissing: false,
+            cancellationToken);
 
     public async Task<Guid> CheckoutAsync(Guid userId, CancellationToken cancellationToken = default)
     {
@@ -101,5 +90,39 @@ public class CartService(IUnitOfWork unitOfWork) : ICartService
             cart.UserId,
             items,
             items.Sum(i => i.TotalPrice));
+    }
+
+    private async Task ExecuteCartMutationWithRetryAsync(
+        Guid userId,
+        Action<Cart> mutate,
+        bool createCartIfMissing,
+        CancellationToken cancellationToken)
+    {
+        for (var attempt = 0; ; attempt++)
+        {
+            var cart = await unitOfWork.Carts.GetByUserIdAsync(userId, cancellationToken);
+            if (cart is null)
+            {
+                if (!createCartIfMissing)
+                    throw new NotFoundException(nameof(Cart), userId);
+
+                cart = Cart.Create(userId);
+                await unitOfWork.Carts.AddAsync(cart, cancellationToken);
+            }
+
+            mutate(cart);
+
+            try
+            {
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+                return;
+            }
+            catch (ConflictException) when (attempt < MaxConcurrencyRetries)
+            {
+                // Backoff reduces repeated collisions under concurrent writes.
+                var delay = BaseRetryDelayMilliseconds * (attempt + 1);
+                await Task.Delay(delay, cancellationToken);
+            }
+        }
     }
 }

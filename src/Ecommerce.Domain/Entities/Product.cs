@@ -36,4 +36,10 @@ public class Product : BaseEntity
         StockQuantity = stockQuantity;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    public void SetCategory(Guid? categoryId)
+    {
+        CategoryId = categoryId;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }
