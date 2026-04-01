@@ -119,6 +119,9 @@ Add environment configurations.
 Ensure Azure Key Vault integration works.
 Generate basic CI/CD pipeline YAML.
 
+Phase 10:
+Create Ecommerce.UI project in asp.net, c#, react, sql server. consume Ecommerce.API, spa template
+
 SUPER PROMPT (Agent Mode – Full Build):
 Use this if you want AI agent to attempt end-to-end generation:
 Act as a senior .NET architect and build a complete e-commerce application in this workspace using .NET 10.
@@ -152,5 +155,5 @@ I can:
 ✅ Convert this into a demo-ready project
 Just say “Start Implementation Walkthrough” 👍
  
-I got these prompts to build an e-commerce app using VS Code Insider AI agent.
+these prompts to build an e-commerce app using VS Code Insider AI agent.
  

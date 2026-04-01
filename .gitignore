@@ -20,3 +20,6 @@
 /src/Ecommerce.Application.Tests/bin
 /src/Ecommerce.Domain/bin
 /src/Ecommerce.Infrastructure/bin
+/src/*.log
+/src/build2.txt
+/src/build_output.txt
