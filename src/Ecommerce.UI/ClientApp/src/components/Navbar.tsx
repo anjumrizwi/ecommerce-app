@@ -84,9 +84,16 @@ export default function Navbar() {
             </>
           ) : (
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <span style={{ fontSize: 13, color: '#6b7280' }}>
+              <Link
+                to="/profile"
+                style={{
+                  fontSize: 13,
+                  color: '#6b7280',
+                  textDecoration: 'none',
+                }}
+              >
                 {user?.displayName ?? user?.email}
-              </span>
+              </Link>
               <button
                 onClick={handleLogout}
                 style={{

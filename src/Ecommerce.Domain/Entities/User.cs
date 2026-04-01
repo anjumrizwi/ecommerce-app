@@ -9,6 +9,11 @@ public class User : BaseEntity
     public string LastName { get; private set; } = string.Empty;
     public string Email { get; private set; } = string.Empty;
     public string PasswordHash { get; private set; } = string.Empty;
+    public string? PhysicalAddress { get; private set; }
+    public string? PinCode { get; private set; }
+    public string? Country { get; private set; }
+    public string? State { get; private set; }
+    public string? GoogleMapLink { get; private set; }
     public UserRole Role { get; private set; } = UserRole.Customer;
 
     public Cart? Cart { get; private set; }
@@ -56,6 +61,36 @@ public class User : BaseEntity
     public void SetRole(UserRole role)
     {
         Role = role;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateProfile(
+        string? physicalAddress,
+        string? pinCode,
+        string? country,
+        string? state,
+        string? googleMapLink)
+    {
+        PhysicalAddress = string.IsNullOrWhiteSpace(physicalAddress)
+            ? null
+            : physicalAddress.Trim();
+
+        PinCode = string.IsNullOrWhiteSpace(pinCode)
+            ? null
+            : pinCode.Trim();
+
+        Country = string.IsNullOrWhiteSpace(country)
+            ? null
+            : country.Trim();
+
+        State = string.IsNullOrWhiteSpace(state)
+            ? null
+            : state.Trim();
+
+        GoogleMapLink = string.IsNullOrWhiteSpace(googleMapLink)
+            ? null
+            : googleMapLink.Trim();
+
         UpdatedAt = DateTime.UtcNow;
     }
 }

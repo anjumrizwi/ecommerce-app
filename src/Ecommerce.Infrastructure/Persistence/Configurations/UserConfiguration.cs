@@ -29,6 +29,21 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasMaxLength(512);
 
+        builder.Property(u => u.PhysicalAddress)
+            .HasMaxLength(1000);
+
+        builder.Property(u => u.PinCode)
+            .HasMaxLength(20);
+
+        builder.Property(u => u.Country)
+            .HasMaxLength(100);
+
+        builder.Property(u => u.State)
+            .HasMaxLength(100);
+
+        builder.Property(u => u.GoogleMapLink)
+            .HasMaxLength(2000);
+
         builder.Property(u => u.Role)
             .HasConversion<string>()
             .HasMaxLength(50);
