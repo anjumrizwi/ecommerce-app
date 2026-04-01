@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './auth/AuthContext'
 import ProtectedRoute from './auth/ProtectedRoute'
+import AdminRoute from './auth/AdminRoute'
 import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
@@ -12,6 +13,8 @@ import CheckoutPage from './pages/CheckoutPage'
 import OrdersPage from './pages/OrdersPage'
 import OrderDetailsPage from './pages/OrderDetailsPage'
 import ProfilePage from './pages/ProfilePage'
+import AdminProductsPage from './pages/AdminProductsPage'
+import AddProductPage from './pages/AddProductPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +45,12 @@ export default function App() {
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/orders/:id" element={<OrderDetailsPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+            </Route>
+
+            {/* Admin routes — require Admin role */}
+            <Route element={<AdminRoute />}>
+              <Route path="/admin/products" element={<AdminProductsPage />} />
+              <Route path="/admin/products/add" element={<AddProductPage />} />
             </Route>
 
             {/* 404 fallback */}

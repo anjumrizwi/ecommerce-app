@@ -26,6 +26,13 @@ export type CreateProductRequest = {
   stockQuantity: number
 }
 
+export type UpdateProductRequest = {
+  name: string
+  description?: string
+  price: number
+  stockQuantity: number
+}
+
 // ─── API calls ────────────────────────────────────────────────────────────────
 
 export const getProducts = async (): Promise<Product[]> => {
@@ -46,4 +53,13 @@ export const getProductsPaged = async (
 export const getProductById = async (id: string): Promise<Product> => {
   const { data } = await api.get<Product>(`/products/${id}`)
   return data
+}
+
+export const createProduct = async (request: CreateProductRequest): Promise<{ id: string }> => {
+  const { data } = await api.post<{ id: string }>('/products', request)
+  return data
+}
+
+export const updateProduct = async (id: string, request: UpdateProductRequest): Promise<void> => {
+  await api.put(`/products/${id}`, request)
 }

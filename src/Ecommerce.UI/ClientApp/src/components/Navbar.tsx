@@ -60,6 +60,22 @@ export default function Navbar() {
               <NavLink to="/orders" style={navLinkStyle}>
                 Orders
               </NavLink>
+              {user?.role === 'Admin' && (
+                <NavLink to="/admin/products" style={navLinkStyle}>
+                  <span
+                    style={{
+                      background: '#f59e0b',
+                      color: '#fff',
+                      padding: '4px 10px',
+                      borderRadius: 4,
+                      fontSize: 12,
+                      fontWeight: 600,
+                    }}
+                  >
+                    Manage Products
+                  </span>
+                </NavLink>
+              )}
             </>
           )}
 
