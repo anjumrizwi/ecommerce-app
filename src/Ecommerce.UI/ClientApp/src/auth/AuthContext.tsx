@@ -17,6 +17,7 @@ import { tokenService } from './tokenService'
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type AuthUser = {
+  displayName?: string
   userId?: string
   email?: string
   role?: string
@@ -36,6 +37,25 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
+function formatDisplayName(firstName?: string, lastName?: string): string | undefined {
+  const normalizedFirstName = firstName?.trim()
+  const normalizedLastName = lastName?.trim()
+
+  if (!normalizedFirstName && !normalizedLastName) {
+    return undefined
+  }
+
+  if (!normalizedFirstName) {
+    return normalizedLastName?.toLowerCase()
+  }
+
+  if (!normalizedLastName) {
+    return normalizedFirstName.toLowerCase()
+  }
+
+  return `${normalizedFirstName[0]}${normalizedLastName}`.toLowerCase()
+}
+
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -53,7 +73,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       try {
         const me = await getMe()
-        setUser(me)
+        setUser({
+          userId: me.userId,
+          email: me.email,
+          role: me.role,
+          displayName: me.displayName,
+        })
       } catch {
         tokenService.clear()
         setUser(null)
@@ -74,14 +99,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { token, email, firstName, lastName, role } =
           await apiLogin(payload)
         tokenService.setAccessToken(token)
-        setUser({ email, role, userId: `${firstName} ${lastName}` })
+        setUser({
+          email,
+          role,
+          displayName: formatDisplayName(firstName, lastName),
+        })
       },
 
       register: async (payload: RegisterRequest) => {
         const { token, email, firstName, lastName, role } =
           await apiRegister(payload)
         tokenService.setAccessToken(token)
-        setUser({ email, role, userId: `${firstName} ${lastName}` })
+        setUser({
+          email,
+          role,
+          displayName: formatDisplayName(firstName, lastName),
+        })
       },
 
       logout: () => {

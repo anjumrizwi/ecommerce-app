@@ -31,6 +31,7 @@ export type MeResponse = {
   userId?: string
   email?: string
   role?: string
+  displayName?: string
 }
 
 // ─── API calls ────────────────────────────────────────────────────────────────

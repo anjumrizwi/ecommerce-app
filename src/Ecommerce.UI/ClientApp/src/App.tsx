@@ -8,6 +8,9 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ProductsPage from './pages/ProductsPage'
 import CartPage from './pages/CartPage'
+import CheckoutPage from './pages/CheckoutPage'
+import OrdersPage from './pages/OrdersPage'
+import OrderDetailsPage from './pages/OrderDetailsPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,6 +37,9 @@ export default function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/orders/:id" element={<OrderDetailsPage />} />
             </Route>
 
             {/* 404 fallback */}

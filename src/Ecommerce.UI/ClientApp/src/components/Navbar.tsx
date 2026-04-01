@@ -53,9 +53,14 @@ export default function Navbar() {
           </NavLink>
 
           {isAuthenticated && (
-            <NavLink to="/cart" style={navLinkStyle}>
-              Cart
-            </NavLink>
+            <>
+              <NavLink to="/cart" style={navLinkStyle}>
+                Cart
+              </NavLink>
+              <NavLink to="/orders" style={navLinkStyle}>
+                Orders
+              </NavLink>
+            </>
           )}
 
           {!isAuthenticated ? (
@@ -80,7 +85,7 @@ export default function Navbar() {
           ) : (
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
               <span style={{ fontSize: 13, color: '#6b7280' }}>
-                {user?.userId ?? user?.email}
+                {user?.displayName ?? user?.email}
               </span>
               <button
                 onClick={handleLogout}

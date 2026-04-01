@@ -52,6 +52,28 @@ public class CartController(ICartService cartService, IMapper mapper) : Controll
         return NoContent();
     }
 
+    /// <summary>Creates an order from the authenticated user's cart.</summary>
+    [HttpPost("checkout")]
+    [ProducesResponseType(typeof(CheckoutResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Checkout([FromBody] CheckoutRequest request, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.PaymentMethod))
+            return BadRequest(new { message = "Payment method is required." });
+
+        var userId = GetUserId();
+        var result = await cartService.CheckoutAsync(
+            userId,
+            new Ecommerce.Application.Services.Carts.CheckoutRequest(
+                request.PaymentMethod,
+                request.PaymentReference),
+            cancellationToken);
+
+        return Ok(new CheckoutResponse(result.OrderId, result.PaymentMethod, result.PaymentStatus));
+    }
+
     private Guid GetUserId()
     {
         var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value

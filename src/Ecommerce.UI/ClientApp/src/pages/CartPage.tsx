@@ -104,9 +104,11 @@ export default function CartPage() {
               <span>Total</span>
               <span>${data?.totalAmount.toFixed(2)}</span>
             </div>
-            <button className="btn-primary" style={{ width: '100%' }}>
-              Proceed to Checkout
-            </button>
+            <Link to="/checkout" style={{ display: 'block' }}>
+              <button className="btn-primary" style={{ width: '100%' }}>
+                Proceed to Checkout
+              </button>
+            </Link>
           </div>
         </div>
       )}

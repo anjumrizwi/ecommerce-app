@@ -100,8 +100,13 @@ public class AuthController : ControllerBase
             ?? User.FindFirst("nameid")?.Value;
         var email = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
         var role = User.FindFirst(ClaimTypes.Role)?.Value;
+        var firstName = User.FindFirst(JwtRegisteredClaimNames.GivenName)?.Value
+            ?? User.FindFirst(ClaimTypes.GivenName)?.Value;
+        var lastName = User.FindFirst(JwtRegisteredClaimNames.FamilyName)?.Value
+            ?? User.FindFirst(ClaimTypes.Surname)?.Value;
+        var displayName = BuildDisplayName(firstName, lastName);
 
-        return Ok(new { userId, email, role });
+        return Ok(new { userId, email, role, displayName });
     }
 
     /// <summary>Admin-only endpoint to verify role-based authorization.</summary>
@@ -124,5 +129,22 @@ public class AuthController : ControllerBase
         {
             return false;
         }
+    }
+
+    private static string? BuildDisplayName(string? firstName, string? lastName)
+    {
+        var normalizedFirstName = firstName?.Trim();
+        var normalizedLastName = lastName?.Trim();
+
+        if (string.IsNullOrEmpty(normalizedFirstName) && string.IsNullOrEmpty(normalizedLastName))
+            return null;
+
+        if (string.IsNullOrEmpty(normalizedFirstName))
+            return normalizedLastName?.ToLowerInvariant();
+
+        if (string.IsNullOrEmpty(normalizedLastName))
+            return normalizedFirstName.ToLowerInvariant();
+
+        return string.Concat(normalizedFirstName[0], normalizedLastName).ToLowerInvariant();
     }
 }

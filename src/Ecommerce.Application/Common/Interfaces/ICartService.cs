@@ -9,5 +9,5 @@ public interface ICartService
     Task UpdateItemQuantityAsync(Guid userId, Guid productId, int quantity, CancellationToken cancellationToken = default);
     Task RemoveItemAsync(Guid userId, Guid productId, CancellationToken cancellationToken = default);
     Task ClearCartAsync(Guid userId, CancellationToken cancellationToken = default);
-    Task<Guid> CheckoutAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<CheckoutResult> CheckoutAsync(Guid userId, CheckoutRequest request, CancellationToken cancellationToken = default);
 }

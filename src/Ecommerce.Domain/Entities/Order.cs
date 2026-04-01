@@ -9,6 +9,9 @@ public class Order : BaseEntity
 
     public string CustomerId { get; private set; } = string.Empty;
     public OrderStatus Status { get; private set; }
+    public PaymentMethod PaymentMethod { get; private set; }
+    public PaymentStatus PaymentStatus { get; private set; }
+    public string? PaymentReference { get; private set; }
     public decimal TotalAmount => _items.Sum(i => i.TotalPrice);
     public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
 
@@ -22,7 +25,9 @@ public class Order : BaseEntity
         return new Order
         {
             CustomerId = customerId,
-            Status = OrderStatus.Pending
+            Status = OrderStatus.Pending,
+            PaymentStatus = PaymentStatus.Pending,
+            PaymentMethod = PaymentMethod.CashOnDelivery
         };
     }
 
@@ -54,6 +59,19 @@ public class Order : BaseEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public void SetPayment(PaymentMethod paymentMethod, string? paymentReference = null)
+    {
+        if (paymentMethod == PaymentMethod.Upi && string.IsNullOrWhiteSpace(paymentReference))
+            throw new ArgumentException("UPI payment reference is required for UPI payments.", nameof(paymentReference));
+
+        PaymentMethod = paymentMethod;
+        PaymentReference = string.IsNullOrWhiteSpace(paymentReference) ? null : paymentReference.Trim();
+        PaymentStatus = paymentMethod == PaymentMethod.Upi
+            ? PaymentStatus.Paid
+            : PaymentStatus.Pending;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     public void Cancel()
     {
         if (Status == OrderStatus.Cancelled)
@@ -63,6 +81,26 @@ public class Order : BaseEntity
             throw new InvalidOperationException("Cannot cancel a delivered order.");
 
         Status = OrderStatus.Cancelled;
+        PaymentStatus = PaymentStatus.Cancelled;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void MarkAsDelivered()
+    {
+        if (Status == OrderStatus.Cancelled)
+            throw new InvalidOperationException("Cannot deliver a cancelled order.");
+
+        if (Status == OrderStatus.Delivered)
+            throw new InvalidOperationException("Order is already delivered.");
+
+        if (Status == OrderStatus.Pending)
+            throw new InvalidOperationException("Cannot deliver an unconfirmed order.");
+
+        Status = OrderStatus.Delivered;
+
+        if (PaymentMethod == PaymentMethod.CashOnDelivery && PaymentStatus == PaymentStatus.Pending)
+            PaymentStatus = PaymentStatus.Paid;
+
         UpdatedAt = DateTime.UtcNow;
     }
 }

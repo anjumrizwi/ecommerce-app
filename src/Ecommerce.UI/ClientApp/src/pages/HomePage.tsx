@@ -18,7 +18,7 @@ export default function HomePage() {
       >
         <h1 style={{ fontSize: 36, fontWeight: 800, marginBottom: 12 }}>
           {isAuthenticated
-            ? `Welcome back, ${user?.userId ?? 'there'}! 👋`
+            ? `Welcome back, ${user?.displayName ?? 'there'}! 👋`
             : 'Modern Ecommerce'}
         </h1>
         <p

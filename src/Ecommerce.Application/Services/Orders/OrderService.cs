@@ -1,5 +1,6 @@
 using Ecommerce.Application.Common.Interfaces;
 using Ecommerce.Domain.Entities;
+using Ecommerce.Domain.Enums;
 using Ecommerce.Domain.Exceptions;
 
 namespace Ecommerce.Application.Services.Orders;
@@ -30,6 +31,9 @@ public class OrderService(IUnitOfWork unitOfWork) : IOrderService
     {
         var order = Order.Create(request.CustomerId);
 
+        if (!Enum.TryParse<PaymentMethod>(request.PaymentMethod, true, out var paymentMethod))
+            throw new ArgumentException("Unsupported payment method.", nameof(request.PaymentMethod));
+
         var productIds = request.Items.Select(i => i.ProductId).ToHashSet();
         var products = await unitOfWork.Products.FindAsync(p => productIds.Contains(p.Id), cancellationToken);
         var productMap = products.ToDictionary(p => p.Id);
@@ -41,6 +45,9 @@ public class OrderService(IUnitOfWork unitOfWork) : IOrderService
 
             order.AddItem(product, item.Quantity);
         }
+
+        order.SetPayment(paymentMethod, request.PaymentReference);
+        order.Confirm();
 
         await unitOfWork.Orders.AddAsync(order, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -57,6 +64,15 @@ public class OrderService(IUnitOfWork unitOfWork) : IOrderService
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task MarkAsDeliveredAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var order = await unitOfWork.Orders.GetByIdAsync(id, cancellationToken)
+            ?? throw new NotFoundException(nameof(Order), id);
+
+        order.MarkAsDelivered();
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task CancelAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var order = await unitOfWork.Orders.GetByIdAsync(id, cancellationToken)
@@ -70,6 +86,9 @@ public class OrderService(IUnitOfWork unitOfWork) : IOrderService
         order.Id,
         order.CustomerId,
         order.Status.ToString(),
+        order.PaymentMethod.ToString(),
+        order.PaymentStatus.ToString(),
+        order.PaymentReference,
         order.TotalAmount,
         order.Items.Select(i => new OrderItemDto(
             i.ProductId,

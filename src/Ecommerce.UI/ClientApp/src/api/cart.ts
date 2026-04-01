@@ -22,6 +22,17 @@ export type AddToCartRequest = {
   quantity: number
 }
 
+export type CheckoutRequest = {
+  paymentMethod: 'Upi' | 'CashOnDelivery'
+  paymentReference?: string
+}
+
+export type CheckoutResponse = {
+  orderId: string
+  paymentMethod: string
+  paymentStatus: string
+}
+
 // ─── API calls ────────────────────────────────────────────────────────────────
 
 export const getCart = async (): Promise<Cart> => {
@@ -38,4 +49,11 @@ export const addToCart = async (
 
 export const removeFromCart = async (productId: string): Promise<void> => {
   await api.delete(`/cart/items/${productId}`)
+}
+
+export const checkoutCart = async (
+  request: CheckoutRequest,
+): Promise<CheckoutResponse> => {
+  const { data } = await api.post<CheckoutResponse>('/cart/checkout', request)
+  return data
 }

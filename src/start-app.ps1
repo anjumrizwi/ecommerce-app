@@ -1,4 +1,7 @@
-﻿# Base path
+﻿d:
+cd D:\GitHub\anjumrizwi\ecommerce-app\src
+
+# Base path
 $BASE_PATH = "D:\GitHub\anjumrizwi\ecommerce-app\src"
 
 Write-Host "Starting Ecommerce API..." -ForegroundColor Cyan

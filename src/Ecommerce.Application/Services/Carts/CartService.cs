@@ -1,5 +1,6 @@
 using Ecommerce.Application.Common.Interfaces;
 using Ecommerce.Domain.Entities;
+using Ecommerce.Domain.Enums;
 using Ecommerce.Domain.Exceptions;
 
 namespace Ecommerce.Application.Services.Carts;
@@ -47,13 +48,19 @@ public class CartService(IUnitOfWork unitOfWork) : ICartService
             createCartIfMissing: false,
             cancellationToken);
 
-    public async Task<Guid> CheckoutAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<CheckoutResult> CheckoutAsync(Guid userId, CheckoutRequest request, CancellationToken cancellationToken = default)
     {
         var cart = await unitOfWork.Carts.GetByUserIdAsync(userId, cancellationToken)
             ?? throw new NotFoundException(nameof(Cart), userId);
 
         if (!cart.Items.Any())
             throw new InvalidOperationException("Cannot checkout an empty cart.");
+
+        if (!Enum.TryParse<PaymentMethod>(request.PaymentMethod, true, out var paymentMethod))
+            throw new ArgumentException("Unsupported payment method.", nameof(request.PaymentMethod));
+
+        if (paymentMethod == PaymentMethod.Upi && string.IsNullOrWhiteSpace(request.PaymentReference))
+            throw new ArgumentException("UPI ID is required for UPI checkout.", nameof(request.PaymentReference));
 
         var productIds = cart.Items.Select(i => i.ProductId).ToHashSet();
         var products = await unitOfWork.Products.FindAsync(p => productIds.Contains(p.Id), cancellationToken);
@@ -69,11 +76,17 @@ public class CartService(IUnitOfWork unitOfWork) : ICartService
             order.AddItem(product, item.Quantity);
         }
 
+        order.SetPayment(paymentMethod, request.PaymentReference);
+        order.Confirm();
+
         await unitOfWork.Orders.AddAsync(order, cancellationToken);
         cart.Clear();
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return order.Id;
+        return new CheckoutResult(
+            order.Id,
+            order.PaymentMethod.ToString(),
+            order.PaymentStatus.ToString());
     }
 
     private static CartDto MapToDto(Cart cart)

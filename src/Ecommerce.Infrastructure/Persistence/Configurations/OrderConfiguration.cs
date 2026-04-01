@@ -17,6 +17,17 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.Status)
             .HasConversion<string>();
 
+        builder.Property(o => o.PaymentMethod)
+            .HasConversion<string>()
+            .HasMaxLength(32);
+
+        builder.Property(o => o.PaymentStatus)
+            .HasConversion<string>()
+            .HasMaxLength(32);
+
+        builder.Property(o => o.PaymentReference)
+            .HasMaxLength(100);
+
         builder.HasMany(o => o.Items)
             .WithOne()
             .HasForeignKey(i => i.OrderId)

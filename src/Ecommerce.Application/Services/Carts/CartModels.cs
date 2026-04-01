@@ -1,5 +1,14 @@
 namespace Ecommerce.Application.Services.Carts;
 
+public record CheckoutRequest(
+    string PaymentMethod,
+    string? PaymentReference);
+
+public record CheckoutResult(
+    Guid OrderId,
+    string PaymentMethod,
+    string PaymentStatus);
+
 public record CartDto(
     Guid Id,
     Guid UserId,
